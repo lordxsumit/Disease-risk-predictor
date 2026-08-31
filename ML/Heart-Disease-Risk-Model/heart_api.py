@@ -44,3 +44,5 @@ def predict_risk(data: HeartDiseaseInput):
     
     # Return the prediction result
     return {"prediction": int(prediction[0])}
+# this is the file for heart disease risk prediction api using fastapi and pydantic. it loads the model from 
+# heart_model.pkl and defines an endpoint for predicting heart disease risk based on input features.
