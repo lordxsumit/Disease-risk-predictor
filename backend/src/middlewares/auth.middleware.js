@@ -35,7 +35,7 @@ const optionalAuth = AsyncHandler(async (req, res, next) => {
     if(token){
         try {
             const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-            req.newUser = await user.findById(decodedToken._id).select("-password")
+            req.newUser = await user.findById(decodedToken?._id).select("-password -refreshToken")
         } catch (error) {
             // ignore invalid token for optional auth
         }

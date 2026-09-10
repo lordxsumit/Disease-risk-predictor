@@ -4,7 +4,3 @@ static
 .ipynb_checkpoints
 
 new.js
-
-prediction.controller.js
-prediction.model.js
-prediction.routes.js
