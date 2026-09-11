@@ -10,10 +10,10 @@ import {
 const router = Router()
 
 // secured routes
-router.route("/disease-prediction").post(verifyJWT, diseasePrediction)
-router.route("/heart-attack-risk").post(verifyJWT, heartAttackRiskPrediction)
-router.route("/stroke-risk").post(verifyJWT, strokeRiskPrediction)
-router.route("/diabetes-risk").post(verifyJWT, diabetesRiskPrediction)
+router.route("/disease-prediction").post(diseasePrediction)
+router.route("/heart-attack-risk").post(heartAttackRiskPrediction)
+router.route("/stroke-risk").post(strokeRiskPrediction)
+router.route("/diabetes-risk").post(diabetesRiskPrediction)
 
 
 export default router
