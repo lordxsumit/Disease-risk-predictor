@@ -11,6 +11,19 @@ const predictionSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    stage: {
+        type: String,
+        enum: ["classification", "risk", "manual"],
+        default: "manual"
+    },
+    predictedDisease: {
+        type: String,
+        trim: true
+    },
+    parentPrediction: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "prediction"
+    },
     inputData: {
         type: mongoose.Schema.Types.Mixed,
         default: {}

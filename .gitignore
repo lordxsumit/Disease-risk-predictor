@@ -4,3 +4,5 @@ static
 .ipynb_checkpoints
 
 new.js
+__pycache__/
+*.py[cod]

@@ -4,12 +4,11 @@ import {
     getMyPredictions,
     getPredictionsById
 } from '../controllers/prediction.controller.js';
-import {verifyJWT, optionalAuth} from '../middlewares/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router()
 
-// Un-secured routes
-router.route("/create").post(optionalAuth, createPrediction)
+router.route("/create").post(verifyJWT, createPrediction)
 
 // secured routes
 router.route("/history").get(verifyJWT, getMyPredictions)
