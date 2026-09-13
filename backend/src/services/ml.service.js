@@ -72,22 +72,22 @@ const handlePrediction = (modelEnvironmentVariable, predictionType) => AsyncHand
 
 
 const diseasePrediction = handlePrediction(
-    'DISEASE_MODEL_URL',
+    'DISEASE_MODEL_URL',                                // Add the Disease model URL here.
     'Disease risk'
 );
 
 const heartAttackRiskPrediction = handlePrediction(
-    'HEART_MODEL_URL',
+    'HEART_MODEL_URL',                                  // Add the Heart model URL here.
     'Heart disease risk'
 );
 
 const strokeRiskPrediction = handlePrediction(
-    'STROKE_MODEL_URL',
+    'STROKE_MODEL_URL',                                 // Add the Stroke model URL here.
     'Stroke risk'
 );
 
 const diabetesRiskPrediction = handlePrediction(
-    'DIABETES_MODEL_URL',
+    'DIABETES_MODEL_URL',                               // Add the Diabetes model URL here.
     'Diabetes risk'
 );
 

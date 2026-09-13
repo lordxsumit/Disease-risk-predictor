@@ -1,11 +1,10 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     diseasePrediction,
     heartAttackRiskPrediction,
     strokeRiskPrediction,
     diabetesRiskPrediction
-} from '../controllers/mlModel.controller.js';
+} from '../services/ml.service.js';
 
 const router = Router()
 
