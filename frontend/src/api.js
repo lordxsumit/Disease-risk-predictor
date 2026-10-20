@@ -1,17 +1,23 @@
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 export const DISEASE_API_URL = import.meta.env.VITE_DISEASE_API_URL || `${API_BASE_URL}/prediction/disease-prediction`;
+export const RISK_API_URLS = {
+  diabetes: `${API_BASE_URL}/prediction/diabetes-risk`,
+  heart: `${API_BASE_URL}/prediction/heart-attack-risk`,
+  stroke: `${API_BASE_URL}/prediction/stroke-risk`,
+};
 export const BACKEND_TIMEOUT = 15000;
 const USER_KEY = 'diseaseRiskUser';
 const ACCESS_TOKEN_KEY = 'diseaseRiskAccessToken';
 const REFRESH_TOKEN_KEY = 'diseaseRiskRefreshToken';
 
-async function requestBackend(url, { method = 'POST', payload } = {}) {
+async function requestBackend(url, { method = 'POST', payload, extraHeaders = {} } = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), BACKEND_TIMEOUT);
   try {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
+    Object.assign(headers, extraHeaders);
 
     const response = await fetch(url, {
       method,
@@ -36,12 +42,60 @@ async function requestBackend(url, { method = 'POST', payload } = {}) {
   } finally { clearTimeout(timeout); }
 }
 
-export function sendBackendRequest(url, payload) {
-  return requestBackend(url, { method: 'POST', payload });
+export function sendBackendRequest(url, payload, extraHeaders = {}) {
+  return requestBackend(url, { method: 'POST', payload, extraHeaders });
 }
 
 export function savePrediction(payload) {
   return sendBackendRequest(`${API_BASE_URL}/prediction/create`, payload);
+}
+
+export async function submitRiskAssessment({
+  type,
+  predictedDisease,
+  parentPrediction,
+  inputData,
+}) {
+  const endpoint = RISK_API_URLS[type];
+  if (!endpoint) {
+    throw new Error('Unsupported disease risk assessment.');
+  }
+  if (!predictedDisease) {
+    throw new Error('The predicted disease is required to calculate risk.');
+  }
+
+  const response = await sendBackendRequest(endpoint, inputData, {
+    'X-Predicted-Disease': predictedDisease,
+  });
+  const modelResult = response?.data;
+  if (!modelResult || typeof modelResult !== 'object' || Array.isArray(modelResult)) {
+    throw new Error('The risk model returned an invalid response.');
+  }
+
+  const riskValue = modelResult.risk_percentage
+    ?? modelResult.stroke_risk_percentage
+    ?? modelResult.predicted_diabetes_risk_score
+    ?? modelResult.prediction;
+  const riskPercentage = Number(riskValue);
+  if (riskValue === undefined || riskValue === null || !Number.isFinite(riskPercentage)) {
+    throw new Error('The risk model response did not include a valid risk score.');
+  }
+
+  const result = { ...modelResult, risk_percentage: riskPercentage };
+  try {
+    await savePrediction({
+      type,
+      stage: 'risk',
+      predictedDisease,
+      parentPrediction,
+      inputData,
+      result,
+    });
+  } catch (error) {
+    throw new Error(`Risk was calculated but could not be saved: ${error.message}`);
+  }
+
+  return result;
 }
 
 export async function getPredictionHistory() {

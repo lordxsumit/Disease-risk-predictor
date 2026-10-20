@@ -352,7 +352,7 @@ function Assessment({ onClose }) {
       const parsed = extractResult(data);
       if (!parsed) throw new Error("Backend returned no result.");
       try {
-        await savePrediction({
+        const savedPrediction = await savePrediction({
           type: "disease",
           stage: "classification",
           predictedDisease: parsed.disease,
@@ -360,11 +360,17 @@ function Assessment({ onClose }) {
           result: parsed.raw,
           status: "completed",
         });
+        const followUp = parsed.raw?.followUp?.disease;
+        const supportedRiskAssessment = ["diabetes", "heart", "stroke"].includes(followUp);
+        setResult({
+          ...parsed,
+          followUp,
+          parentPrediction: savedPrediction?.data?._id,
+        });
+        setState(supportedRiskAssessment ? "risk" : "result");
       } catch (saveError) {
         throw new Error(`Prediction completed but could not be saved: ${saveError.message}`);
       }
-      setResult(parsed);
-      setState("result");
     } catch (e) {
       setError(e.message || "No response was received from the backend.");
       setState("error");
@@ -386,12 +392,30 @@ function Assessment({ onClose }) {
         />
       </StateOverlay>
     );
+  if (state === "risk") {
+    const RiskComponent = {
+      diabetes: DiabetesRisk,
+      heart: HeartRisk,
+      stroke: StrokeRisk,
+    }[result?.followUp];
+
+    return (
+      <StateOverlay>
+        <RiskComponent
+          predictedDisease={result.disease}
+          parentPrediction={result.parentPrediction}
+          onBack={() => setState("result")}
+        />
+      </StateOverlay>
+    );
+  }
   if (state === "result")
     return (
       <StateOverlay>
         <BackendResult
           result={result}
           onHome={onClose}
+          onContinueRisk={() => setState("risk")}
           onDashboard={() => nav("/dashboard")}
         />
       </StateOverlay>
@@ -552,7 +576,7 @@ function Loading({ message }) {
     </div>
   );
 }
-function BackendResult({ result, onHome, onDashboard }) {
+function BackendResult({ result, onHome, onContinueRisk, onDashboard }) {
   return (
     <div className="result-page">
       <div className="final-result-card">
@@ -583,6 +607,12 @@ function BackendResult({ result, onHome, onDashboard }) {
           provided during the assessment.
         </p>
         <div className="final-buttons">
+          {result.followUp && (
+            <button className="result-primary-btn" onClick={onContinueRisk}>
+              <i className="fa-solid fa-heart-pulse" /> Continue to{" "}
+              {result.followUp} risk assessment
+            </button>
+          )}
           <button className="result-primary-btn" onClick={onDashboard}>
             <i className="fa-solid fa-chart-pie" /> View Dashboard
           </button>

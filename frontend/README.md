@@ -9,9 +9,10 @@ This is a React/Vite conversion of the supplied Disease Risk frontend. Existing 
 4. Symptoms are shown 12 per page with the same Yes/No flow.
 5. On completion, React sends the selected symptoms as a string array to the authenticated Express route at `VITE_DISEASE_API_URL` (default `http://localhost:8000/api/v1/prediction/disease-prediction`).
 6. After Express returns a prediction, React saves the symptoms and result through the authenticated `/prediction/create` route.
-7. The dashboard loads assessment history from the authenticated `/prediction/history` route.
-8. If prediction or saving fails, the error page explains the failure rather than showing an unsaved result as complete.
-9. Dashboard remains protected by login.
+7. If the predicted disease is diabetes, heart disease, or stroke, React opens that disease's questionnaire and sends its answers to the matching authenticated risk route. The returned risk score is also saved through `/prediction/create`, linked to the disease classification.
+8. The dashboard loads assessment history from the authenticated `/prediction/history` route.
+9. If prediction or saving fails, the error page explains the failure rather than showing an unsaved result as complete.
+10. Dashboard remains protected by login.
 
 ## Backend response
 The UI recognizes these common disease keys either in the response body or inside its `data` field: `disease`, `prediction`, `predicted_disease`, `predictedDisease`, `result`.
